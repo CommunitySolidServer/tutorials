@@ -1,6 +1,8 @@
-This is a tutorial uses the [Community Solid Server (CSS)](https://github.com/solid/community-server)
+This tutorial uses the [Community Solid Server (CSS)](https://github.com/solid/community-server)
 to both provide an introduction to Solid server behaviour,
 and an introduction to the CSS itself.
+
+This tutorial was last tested with v4.0.1 of the CSS and v1.12.1 of the `solid-authn-client`.
 
 ## Index
 - [Index](#index)
@@ -89,7 +91,8 @@ curl http://localhost:3000/
 
 <> a <http://www.w3.org/ns/pim/space#Storage>, ldp:Container, ldp:BasicContainer, ldp:Resource;
     dc:modified "2022-01-11T12:00:06.000Z"^^xsd:dateTime;
-    <http://www.w3.org/ns/auth/acl#accessControl> <.acl>.
+    <http://www.w3.org/ns/auth/acl#accessControl> <.acl>;
+    ldp:contains <index.html>.
 ```
 
 Note that this is a turtle representation of the root container.
@@ -106,6 +109,7 @@ curl -H "Accept: application/n-triples"  http://localhost:3000/
 <http://localhost:3000/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ldp#Resource> .
 <http://localhost:3000/> <http://purl.org/dc/terms/modified> "2022-01-11T12:00:06.000Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
 <http://localhost:3000/> <http://www.w3.org/ns/auth/acl#accessControl> <http://localhost:3000/.acl> .
+<http://localhost:3000/> <http://www.w3.org/ns/ldp#contains> <http://localhost:3000/index.html> .
 ```
 
 And in case the HTML representation is needed, as seen in the previous step,
@@ -302,7 +306,7 @@ and all its recursively contained resources (`acl:default <./>`).
 This explains why we could not access the profile container:
 we did not identify ourselves as our WebID.
 
-You might wonder why we could read the profile resource
+You might wonder why we could read the `profile/card` resource
 even though the above ACL resource prevents all access recursively.
 The reason for this is that WAC tries to find the ACL resource
 closest to the resource that is being accessed.
@@ -318,7 +322,7 @@ thereby making the profile fully readable for everyone.
 While this is not covered in this tutorial,
 it should already be noted that research is being done
 into having a new authentication mechanism for Solid servers called
-[Access Control Policies (ACP)](https://github.com/solid/authorization-panel/blob/main/proposals/acp/index.md).
+[Access Control Policies (ACP)](https://solid.github.io/authorization-panel/acp-specification/).
 This is not supported yet in CSS but is planned as a future alternative.
 
 ## Authentication and client applications
@@ -350,7 +354,7 @@ cd packages/browser/examples/demoClientApp
 npm install
 npm start
 ```
-This automatically opens a new tab in your browser at http://localhost:3001/.
+This will start the demo application which you can see at http://localhost:3001/.
 
 ### Accessing a protected resource
 In the authentication client, fill in the address of your running CSS instance (`http://localhost:3000/`)
@@ -359,7 +363,7 @@ This redirects you to your CSS instance that asks for your email and password co
 After logging in there you are redirected back to the authentication client
 which shows that you will be identified with your WebID.
 
-You can now enter http://localhost:3000/profile/ in the field lower on the page and press fetch
+You can now enter `http://localhost:3000/profile/` in the `Resource` field on the page and press fetch
 to access the resource that was previously restricted.
 
 ### Authentication summary
