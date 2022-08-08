@@ -1,4 +1,4 @@
-This tutorial uses the [Community Solid Server (CSS)](https://github.com/solid/community-server)
+This tutorial uses the [Community Solid Server (CSS)](https://github.com/CommunitySolidServer/CommunitySolidServer)
 to both provide an introduction to Solid server behaviour,
 and an introduction to the CSS itself.
 
@@ -39,7 +39,7 @@ You will need the following to follow this tutorial:
 
 * [git](https://git-scm.com/)
 * [Node.js](https://nodejs.org/en/)
-  * Preferably 16.x but at the time of writing 12.x and 14.x should also work.
+  * Preferably 16.x but at the time of writing 14.x should also work.
 * A text editor
 
 It makes things easier to keep all the work contained in a specific folder.
@@ -50,7 +50,7 @@ CSS is an open and modular implementation of the Solid [protocol](https://solidp
 It's easy to set up, and due to its modular nature many features can be configured,
 some of which we will cover later.
 
-More information on the server can be found in the [repository](https://github.com/solid/community-server).
+More information on the server can be found in the [repository](https://github.com/CommunitySolidServer/CommunitySolidServer).
 
 ### Getting started
 While you can install the server as a global application,
@@ -58,7 +58,7 @@ we work directly from the source in this tutorial.
 You do this by cloning the server from the git repository and installing it:
 
 ```shell
-git clone https://github.com/solid/community-server.git
+git clone https://github.com/CommunitySolidServer/CommunitySolidServer.git
 cd community-server
 npm install
 ```
@@ -72,7 +72,7 @@ This starts your own Solid server, which you then see at http://localhost:3000/.
 
 ### Example Solid HTTP requests
 All interactions with the server happen through HTTP requests,
-which each HTTP method having its own use.
+with each HTTP method having its own use.
 Below are some common examples.
 You run these using `curl` on the command line,
 or by manually constructing the queries in an HTTP client such as [Hoppscotch](https://hoppscotch.io/).
@@ -91,7 +91,6 @@ curl http://localhost:3000/
 
 <> a <http://www.w3.org/ns/pim/space#Storage>, ldp:Container, ldp:BasicContainer, ldp:Resource;
     dc:modified "2022-01-11T12:00:06.000Z"^^xsd:dateTime;
-    <http://www.w3.org/ns/auth/acl#accessControl> <.acl>;
     ldp:contains <index.html>.
 ```
 
@@ -108,12 +107,11 @@ curl -H "Accept: application/n-triples"  http://localhost:3000/
 <http://localhost:3000/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ldp#BasicContainer> .
 <http://localhost:3000/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ldp#Resource> .
 <http://localhost:3000/> <http://purl.org/dc/terms/modified> "2022-01-11T12:00:06.000Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
-<http://localhost:3000/> <http://www.w3.org/ns/auth/acl#accessControl> <http://localhost:3000/.acl> .
 <http://localhost:3000/> <http://www.w3.org/ns/ldp#contains> <http://localhost:3000/index.html> .
 ```
 
 And in case the HTML representation is needed, as seen in the previous step,
-you can send an `text/html` Accept header along.
+you can send a `text/html` Accept header along.
 
 #### POSTing new resources
 Post is used to create new resources.
@@ -166,7 +164,7 @@ and only want to make a smaller change.
 
 All Solid servers are required to support [N3 Patch](https://solid.github.io/specification/protocol#n3-patch)
 to modify RDF resources. 
-The following request modified the resource we created in the previous step.
+The following request modifies the resource we created in the previous step.
 ```shell
 curl -X PATCH -H "Content-Type: text/n3" --data-raw "@prefix solid: <http://www.w3.org/ns/solid/terms#>. _:rename a solid:InsertDeletePatch; solid:inserts { <ex:s3> <ex:p3> <ex:o3>. }." http://localhost:3000/a/b/c
 ```
@@ -175,7 +173,7 @@ The above command will append the triple `<ex:s3> <ex:p3> <ex:o3>.` to the RDF r
 which can be verified by GETting http://localhost:3000/a/b/c.
 
 While not officially in the Solid spec,
-CSS also supports [SPARQL UPDATE](https://www.w3.org/TR/sparql11-update/) for PATCH requests, 
+CSS also supports [SPARQL Update](https://www.w3.org/TR/sparql11-update/) for PATCH requests, 
 as do many other Solid servers.
 
 The following request does the same as the N3 Patch request above.
@@ -209,7 +207,7 @@ then start it again with the following command from the source folder:
 npm start -- -c config/file.json -f ../.data
 ```
 The above command starts the server with the `file.json` config,
-one of the available [default configurations](https://github.com/solid/community-server/tree/main/config),
+one of the available [default configurations](https://github.com/CommunitySolidServer/CommunitySolidServer/tree/main/config),
 which starts the server with a file backend.
 The `-f ../.data` parameter tells the server we want all data to be stored in that folder. 
 
@@ -227,8 +225,9 @@ With the newly configured server,
 if you browse to http://localhost:3000/ you will now see a setup screen.
 This setup allows you already set some initial permissions on the server.
 
-For this tutorial we take the `Sign up for an account` option.
-Choose the options to create a new WebID in the root.
+For this tutorial we take the **Sign up for an account** option.
+Choose the options to **Create a new WebID for my Pod**
+and to **Create a new Pod with my WebID as owner** **...in the root**.
 Make sure you don't forget the email/password combination that you choose.
 The response page will show some extra information about the setup result.
 
@@ -251,7 +250,7 @@ but your other resources can have restricted access.
 For example, when trying to access the profile container http://localhost:3000/profile/
 you receive a `403: Not Logged In` error.
 
-We will cover how to correctly authenticate in the next section,
+We cover how to correctly authenticate in the next section,
 but we can already have a look now why this is the case.
 Since the server is now running in file mode,
 we can cheat and have a look at the files on disk to see what exactly is causing this.
@@ -387,7 +386,7 @@ so it is both a Solid server and an IdP.
 
 Step 5 mentions that your WebID contains which IdP you trust.
 You can see this by looking at your profile document http://localhost:3000/profile/card#me.
-It will contain the triple `:me solid:oidcIssuer <http://localhost:3000/> .`.
+It will contain the triple `:me solid:oidcIssuer <http://localhost:3000/>`.
 This is the triple that identifies our CSS instance as a trusted IdP.
 
 In this example the CSS instance contained the resource you were trying to access,
@@ -420,7 +419,7 @@ to have a memory backend or a file backend, but many more options are available.
 ### Components.js
 When we wanted CSS to store data on disk,
 we told it to use the configuration
-[config/file.json](https://github.com/solid/community-server/blob/main/config/file.json),
+[config/file.json](https://github.com/CommunitySolidServer/CommunitySolidServer/blob/main/config/file.json),
 which you can find in the CSS source folder.
 This is a [JSON-LD](https://json-ld.org/) file that mostly imports many other JSON-LD documents.
 If you explored all the imports you would find out that these documents
@@ -450,7 +449,7 @@ On the other hand, `config/file.json` has the following import instead:
 Simply by changing that import in a configuration you can tell it what backend to use.
 Every subfolder of `config` has a `README.md` document explaining what the available options are.
 For example, if you have a look at
-[config/storage/README.md](https://github.com/solid/community-server/tree/main/config/storage)
+[config/storage/README.md](https://github.com/CommunitySolidServer/CommunitySolidServer/tree/main/config/storage)
 you can see that it is also possible to have a SPARQL backend by changing the import to use `sparql.json`.
 At the time of writing there are 29 import lines, so those are 29 features that can easily be customized.
 
@@ -469,7 +468,7 @@ and rename it to `unsafe.json`.
 The import we want to change is the one that is responsible for authorization,
 which is the `files-scs:config/ldp/authorization/webacl.json` import.
 Looking at the documentation for the 
-[ldp configuration options](https://github.com/solid/community-server/blob/main/config/ldp/README.md)
+[ldp configuration options](https://github.com/CommunitySolidServer/CommunitySolidServer/blob/main/config/ldp/README.md)
 we can see that another option for authorization is `allow-all`,
 so change that import line to be `files-scs:config/ldp/authorization/allow-all.json` instead.
 Now start the server with the new server as follows:
@@ -491,7 +490,7 @@ In those cases it will be necessary to create a configuration that is a combinat
 of specific imports and custom Components.js.
 This requires more knowledge about the server and Components.js so we will not go deeper into this.
 An example is the
-[config/sparql-file-storage.json](https://github.com/solid/community-server/blob/main/config/sparql-file-storage.json)
+[config/sparql-file-storage.json](https://github.com/CommunitySolidServer/CommunitySolidServer/blob/main/config/sparql-file-storage.json)
 configuration, which uses a file backend for internal data such as accounts,
 and a SPARQL backend for all standard Solid data.
 This configuration removed a few imports,
