@@ -59,7 +59,7 @@ You do this by cloning the server from the git repository and installing it:
 
 ```shell
 git clone https://github.com/CommunitySolidServer/CommunitySolidServer.git
-cd community-server
+cd CommunitySolidServer
 npm install
 ```
 
