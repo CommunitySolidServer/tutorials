@@ -2,7 +2,7 @@ This tutorial uses the [Community Solid Server (CSS)](https://github.com/Communi
 to both provide an introduction to Solid server behaviour,
 and an introduction to the CSS itself.
 
-This tutorial was last tested with v4.0.1 of the CSS and v1.12.1 of the `solid-authn-client`.
+This tutorial was last tested with v5.0.0 of the CSS and v1.12.1 of the `solid-authn-client`.
 
 ## Index
 - [Index](#index)
@@ -440,11 +440,11 @@ For example, if you look at the config that is used
 when running the server with `npm start` (`config/default.json`)
 you can see it has the following import:
 ```
-"files-scs:config/storage/backend/memory.json"
+"css:config/storage/backend/memory.json"
 ```
 On the other hand, `config/file.json` has the following import instead:
 ```
-"files-scs:config/storage/backend/file.json"
+"css:config/storage/backend/file.json"
 ```
 Simply by changing that import in a configuration you can tell it what backend to use.
 Every subfolder of `config` has a `README.md` document explaining what the available options are.
@@ -453,7 +453,7 @@ For example, if you have a look at
 you can see that it is also possible to have a SPARQL backend by changing the import to use `sparql.json`.
 At the time of writing there are 29 import lines, so those are 29 features that can easily be customized.
 
-As for why these imports use the `files-scs` prefix we refer to the Components.js documentation
+As for why these imports use the `css` prefix we refer to the Components.js documentation
 as this is based on the project settings.
 
 #### Disabling authorization
@@ -466,11 +466,11 @@ To start, copy the `config/file.json` file to your root tutorial folder,
 this is the same folder that should contain your `.data` folder,
 and rename it to `unsafe.json`.
 The import we want to change is the one that is responsible for authorization,
-which is the `files-scs:config/ldp/authorization/webacl.json` import.
+which is the `css:config/ldp/authorization/webacl.json` import.
 Looking at the documentation for the 
 [ldp configuration options](https://github.com/CommunitySolidServer/CommunitySolidServer/blob/main/config/ldp/README.md)
 we can see that another option for authorization is `allow-all`,
-so change that import line to be `files-scs:config/ldp/authorization/allow-all.json` instead.
+so change that import line to be `css:config/ldp/authorization/allow-all.json` instead.
 Now start the server with the new server as follows:
 ```shell
 cd CommunitySolidServer
