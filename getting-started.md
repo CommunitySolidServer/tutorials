@@ -59,7 +59,7 @@ You do this by cloning the server from the git repository and installing it:
 
 ```shell
 git clone https://github.com/CommunitySolidServer/CommunitySolidServer.git
-cd community-server
+cd CommunitySolidServer
 npm install
 ```
 
@@ -473,7 +473,7 @@ we can see that another option for authorization is `allow-all`,
 so change that import line to be `files-scs:config/ldp/authorization/allow-all.json` instead.
 Now start the server with the new server as follows:
 ```shell
-cd community-server
+cd CommunitySolidServer
 npm start -- -c ../unsafe.json -f ../.data
 ```
 This starts the server again on http://localhost:3000/.
