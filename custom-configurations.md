@@ -125,11 +125,8 @@ Chances are that configuration will contain the definition of the component you 
 In case there is no clear answer in there because there are many components, and you are not sure which one to edit,
 or it is not clear what the parameters of a component do,
 the [architecture](https://communitysolidserver.github.io/CommunitySolidServer/5.x/architecture/overview/)
-or [API](https://communitysolidserver.github.io/CommunitySolidServer/4.x/docs/)
+or [API](https://communitysolidserver.github.io/CommunitySolidServer/5.x/docs/)
 documentation might provide further information.
-
-(At the time of writing there are some issues with our API documentation so the link above goes to the previous version,
-this will be updated to the more recent URL once this is fixed).
 
 Below are some examples showing how you could discover where you need to make changes.
 Note that this is not an exact science, 
