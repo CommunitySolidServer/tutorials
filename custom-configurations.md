@@ -424,8 +424,8 @@ and provides a new implementation for the relevant identifiers found within.
     "css:config/util/identifiers/suffix.json",
     "css:config/util/index/default.json",
     "css:config/util/logging/winston.json",
+    "css:config/util/representation-conversion/default.json",
 
-    "css:config/util/resource-locker/file.json",
     "css:config/util/variables/default.json"
   ],
   "@graph": [
