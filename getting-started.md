@@ -60,7 +60,7 @@ You do this by cloning the server from the git repository and installing it:
 ```shell
 git clone https://github.com/CommunitySolidServer/CommunitySolidServer.git
 cd CommunitySolidServer
-npm install
+npm ci
 ```
 
 After that you start the server by running the following command from the same folder:
