@@ -341,7 +341,7 @@ Start by cloning and installing that library in the tutorial folder:
 ```shell
 git clone https://github.com/inrupt/solid-client-authn-js.git
 cd solid-client-authn-js
-npm install
+npm ci
 ```
 
 This library contains both implementations for authenticating using Node.js and JavaScript in the browser.
@@ -350,7 +350,7 @@ We use one of these example implementations here.
 After installation is complete, use the following commands to install and start this client:
 ```shell
 cd packages/browser/examples/demoClientApp
-npm install
+npm ci
 npm start
 ```
 This will start the demo application which you can see at http://localhost:3001/.
