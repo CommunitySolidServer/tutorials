@@ -108,6 +108,10 @@ We will cover what you can do if none of the options match your needs later in t
 Some options might change or new ones get added for a new major release of the server.
 These will always be documented in the release notes.
 
+There is also a configuration tool that provides a user interface for doing what we described above.
+It can be found at <https://communitysolidserver.github.io/configuration-generator/>
+and generates JSON-LD that you can use to start a CSS instance with the chosen options.
+
 ## Finding the relevant component
 
 In case none of the import clusters completely support what you want,

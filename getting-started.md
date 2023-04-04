@@ -484,11 +484,17 @@ showing that authentication no longer checks requests.
 Note also that all data is still there even though 
 the server was stopped and restarted with a different configuration.
 
+### Configuration tool
+There is also a configuration tool that provides a user interface for doing what we described above.
+It can be found at <https://communitysolidserver.github.io/configuration-generator/>
+and generates JSON-LD that you can use to start a CSS instance with the chosen options.
+
 ### Rewriting configurations
 Sometimes more customization is needed than what changing the imports allow.
 In those cases it will be necessary to create a configuration that is a combination
 of specific imports and custom Components.js.
-This requires more knowledge about the server and Components.js so we will not go deeper into this.
+This requires more knowledge about the server and Components.js, so we will not go deeper into this.
+A more extensive tutorial on this can be found [here](custom-configurations.md).
 An example is the
 [config/sparql-file-storage.json](https://github.com/CommunitySolidServer/CommunitySolidServer/blob/main/config/sparql-file-storage.json)
 configuration, which uses a file backend for internal data such as accounts,
