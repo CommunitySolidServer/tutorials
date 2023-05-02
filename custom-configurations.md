@@ -46,15 +46,16 @@ that most closely matches what you want, and adapt that one.
 Below is a copy of one of those default configurations:
 ```json
 {
-  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^5.0.0/components/context.jsonld",
+  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^6.0.0/components/context.jsonld",
   "import": [
     "css:config/app/main/default.json",
     "css:config/app/init/default.json",
     "css:config/app/setup/required.json",
     "css:config/app/variables/default.json",
     "css:config/http/handler/default.json",
-    "css:config/http/middleware/websockets.json",
-    "css:config/http/server-factory/websockets.json",
+    "css:config/http/middleware/default.json",
+    "css:config/http/notifications/websockets.json",
+    "css:config/http/server-factory/http.json",
     "css:config/http/static/default.json",
     "css:config/identity/access/public.json",
     "css:config/identity/email/default.json",
@@ -128,8 +129,8 @@ that contains the feature you want to change.
 Chances are that configuration will contain the definition of the component you want to change.
 In case there is no clear answer in there because there are many components, and you are not sure which one to edit,
 or it is not clear what the parameters of a component do,
-the [architecture](https://communitysolidserver.github.io/CommunitySolidServer/5.x/architecture/overview/)
-or [API](https://communitysolidserver.github.io/CommunitySolidServer/5.x/docs/)
+the [architecture](https://communitysolidserver.github.io/CommunitySolidServer/6.x/architecture/overview/)
+or [API](https://communitysolidserver.github.io/CommunitySolidServer/6.x/docs/)
 documentation might provide further information.
 
 Below are some examples showing how you could discover where you need to make changes.
@@ -143,19 +144,19 @@ Let's look at the use case of changing the timeout of the locking system.
 One of the clusters in the example above is `"css:config/util/resource-locker/file.json"`,
 which determines that the server will use a file-based locking system.
 If we have a look at this
-[file](https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v5.1.0/config/util/resource-locker/file.json)
+[file](https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v6.0.0/config/util/resource-locker/file.json)
 we see the following (some parts cut for brevity):
 
 ```json
 {
-  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^5.0.0/components/context.jsonld",
+  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^6.0.0/components/context.jsonld",
   "@graph": [
     {
       "comment": "Allows multiple simultaneous read operations. Locks are stored on filesystem. Locks expire after inactivity. This locker is threadsafe.",
       "@id": "urn:solid-server:default:ResourceLocker",
       "@type": "WrappedExpiringReadWriteLocker",
-      "locker": { 
-        "@type": "GreedyReadWriteLocker",
+      "locker": {
+        "@type": "EqualReadWriteLocker",
         ...
       },
       "expiration": 6000
@@ -177,7 +178,7 @@ to have a full understanding of what is going on in this file,
 but we'll provide a short summary here which should help you along.
 Every `@type` field corresponds to a TypeScript class in the CSS project.
 `WrappedExpiringReadWriteLocker` is a class for which you can find the
-[source code](https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v5.1.0/src/util/locking/WrappedExpiringReadWriteLocker.ts)
+[source code](https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v6.0.0/src/util/locking/WrappedExpiringReadWriteLocker.ts)
 in the CSS repository.
 A block with this field in it will tell Components.js that it should create an instance of this class if it finds it.
 The `@id` field is a unique identifier that we create so we can reference to this instance in different locations.
@@ -190,7 +191,7 @@ All the other values are parameters for the constructor of the class (except for
 Now to get back to how we find the component we want to edit.
 There are several components here, but one of them is of a locker type, has a description saying it is used for locks,
 and, most importantly, has an `expiration` parameter.
-The [API documentation](https://communitysolidserver.github.io/CommunitySolidServer/4.x/docs/classes/WrappedExpiringReadWriteLocker.html)
+The [API documentation](https://communitysolidserver.github.io/CommunitySolidServer/6.x/docs/classes/WrappedExpiringReadWriteLocker.html)
 of this class also states
 
 > Wraps around an existing ReadWriteLocker and adds expiration logic to prevent locks from getting stuck.
@@ -203,12 +204,12 @@ How to exactly do this we will show in the override section further below.
 To change the templates that are used during pod creation we use a similar tactic as in the locking example above.
 The default config has an import `"css:config/identity/pod/static.json"`,
 which determines how pods creation works.
-That [file](https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v5.1.0/config/identity/pod/static.json)
+That [file](https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v6.0.0/config/identity/pod/static.json)
 has the following contents:
 
 ```json
 {
-  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^5.0.0/components/context.jsonld",
+  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^6.0.0/components/context.jsonld",
   "import": [
     "css:config/identity/pod/resource-generators/templated.json"
   ],
@@ -227,29 +228,22 @@ has the following contents:
 This does not seem to have anything related to the templates used unfortunately.
 It does have an import though: `"css:config/identity/pod/resource-generators/templated.json"`.
 This means that
-[file]((https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v5.1.0/config/identity/pod/resource-generators/templated.json))
+[file]((https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v6.0.0/config/identity/pod/resource-generators/templated.json))
 is also related to the pod management cluster.
 It contains the following data:
 
 ```json
 {
-  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^5.0.0/components/context.jsonld",
+  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^6.0.0/components/context.jsonld",
   "@graph": [
     {
-      "comment": "Generates resources based on the templates stored in the template folder.",
-      "@id": "urn:solid-server:default:ResourcesGenerator",
-      "@type": "TemplatedResourcesGenerator",
+      "comment": "Generates pods based on the templates in the corresponding folder.",
+      "@id": "urn:solid-server:default:PodResourcesGenerator",
+      "@type": "StaticFolderGenerator",
       "templateFolder": "@css:templates/pod",
-      "factory": {
-        "@type": "ExtensionBasedMapperFactory"
-      },
-      "templateEngine": {
-        "@type": "HandlebarsTemplateEngine",
-        "baseUrl": { "@id": "urn:solid-server:default:variable:baseUrl" }
-      },
-      "metadataStrategy": { "@id": "urn:solid-server:default:MetadataStrategy" },
-      "store": { "@id": "urn:solid-server:default:ResourceStore"}
-    }
+      "resourcesGenerator": { "@id": "urn:solid-server:default:TemplatedResourcesGenerator" }
+    },
+    ...
   ]
 }
 ```
@@ -287,7 +281,7 @@ Going back to the lock expiration example of above, the following config could b
 
 ```json
 {
-  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^5.0.0/components/context.jsonld",
+  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^6.0.0/components/context.jsonld",
   "@graph": [
     {
       "@type": "Override",
@@ -357,7 +351,7 @@ We can thus append our own converter with the following configuration:
 
 ```json
 {
-  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^5.0.0/components/context.jsonld",
+  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^6.0.0/components/context.jsonld",
   "@graph": [
     {
       "@id": "urn:solid-server:default:ChainedConverter",
@@ -399,15 +393,16 @@ and provides a new implementation for the relevant identifiers found within.
 
 ```json
 {
-  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^5.0.0/components/context.jsonld",
+  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^6.0.0/components/context.jsonld",
   "import": [
     "css:config/app/main/default.json",
     "css:config/app/init/default.json",
     "css:config/app/setup/required.json",
     "css:config/app/variables/default.json",
     "css:config/http/handler/default.json",
-    "css:config/http/middleware/websockets.json",
-    "css:config/http/server-factory/websockets.json",
+    "css:config/http/middleware/default.json",
+    "css:config/http/notifications/websockets.json",
+    "css:config/http/server-factory/http.json",
     "css:config/http/static/default.json",
     "css:config/identity/access/public.json",
     "css:config/identity/email/default.json",

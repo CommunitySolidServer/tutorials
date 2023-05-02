@@ -2,7 +2,7 @@ This tutorial uses the [Community Solid Server (CSS)](https://github.com/Communi
 to both provide an introduction to Solid server behaviour,
 and an introduction to the CSS itself.
 
-This tutorial was last tested with v5.0.0 of the CSS and v1.12.1 of the `solid-authn-client`.
+This tutorial was last tested with v6.0.0 of the CSS and v1.15.0 of the `solid-authn-client`.
 
 ## Index
 - [Index](#index)
@@ -17,7 +17,7 @@ This tutorial was last tested with v5.0.0 of the CSS and v1.12.1 of the `solid-a
     + [DELETE a resource](#delete-a-resource)
   * [Using a different configuration](#using-a-different-configuration)
     + [File backend](#file-backend)
-- [Web Access Control (WAC)](#web-access-control--wac-)
+- [Web Access Control (WAC)](#web-access-control-wac)
   * [Setup](#setup)
     + [WebID](#webid)
     + [Access Control List](#access-control-list)
@@ -227,7 +227,7 @@ This setup allows you already set some initial permissions on the server.
 
 For this tutorial we take the **Sign up for an account** option.
 Choose the options to **Create a new WebID for my Pod**
-and to **Create a new Pod with my WebID as owner** **...in the root**.
+and to **Create a new Pod with my WebID as owner** with pod name **my-pod**.
 Make sure you don't forget the email/password combination that you choose.
 The response page will show some extra information about the setup result.
 
@@ -238,8 +238,8 @@ A [WebID](https://dvcs.w3.org/hg/WebID/raw-file/tip/spec/identity-respec.html)
 is a way to identify yourself on the Web
 and is a core concept when authenticating with Solid.
 We make use of this a bit later in this tutorial.
-After setup, you can find your profile resource at http://localhost:3000/profile/card,
-with your WebID being http://localhost:3000/profile/card#me.
+After setup, you can find your profile resource at http://localhost:3000/my-pod/profile/card,
+with your WebID being http://localhost:3000/my-pod/profile/card#me.
 
 In case that you want multiple users to have their WebID on your server,
 you could have chosen to create your WebID in a specific namespace during setup.
@@ -247,7 +247,7 @@ you could have chosen to create your WebID in a specific namespace during setup.
 #### Access Control List
 Your WebID needs to be publicly accessible, so you can be identified,
 but your other resources can have restricted access.
-For example, when trying to access the profile container http://localhost:3000/profile/
+For example, when trying to access the profile container http://localhost:3000/my-pod/profile/
 you receive a `403: Not Logged In` error.
 
 We cover how to correctly authenticate in the next section,
@@ -258,8 +258,8 @@ we can cheat and have a look at the files on disk to see what exactly is causing
 WAC uses Access Control List (ACL) resources to determine what is allowed.
 In general, these resources have an `.acl` extension,
 but you can always find the corresponding ACL in the response header when GETting a resource.
-The ACL resource that determines access to the root container is `http://localhost:3000/.acl`.
-This means that we can find our root ACL resource by looking for the `../.data/.acl` file.
+The ACL resource that determines access to the root of our pod is `http://localhost:3000/my-pod/.acl`.
+This means that we can find our root ACL resource by looking for the `../.data/my-pod/.acl` file.
 This file has the following contents:
 
 ```turtle
@@ -279,7 +279,7 @@ This file has the following contents:
 # unless specifically authorized in other .acl resources.
 <#owner>
     a acl:Authorization;
-    acl:agent <http://localhost:3000/profile/card#me>;
+    acl:agent <http://localhost:3000/my-pod/profile/card#me>;
     # Optional owner email, to be used for account recovery:
     acl:agent <mailto:test@example.com>;
     # Set the access to the root storage folder itself
@@ -297,7 +297,7 @@ is readable (`acl:mode acl:Read`)
 by all agents (`acl:agentClass foaf:Agent`).
 
 The second block defines that the user identified as 
-our WebID (`acl:agent <http://localhost:3000/profile/card#me>`)
+our WebID (`acl:agent <http://localhost:3000/my-pod/profile/card#me>`)
 has full access (`acl:mode acl:Read, acl:Write, acl:Control`)
 to both the root container (`acl:accessTo <./>`)
 and all its recursively contained resources (`acl:default <./>`).
@@ -305,15 +305,15 @@ and all its recursively contained resources (`acl:default <./>`).
 This explains why we could not access the profile container:
 we did not identify ourselves as our WebID.
 
-You might wonder why we could read the `profile/card` resource
+You might wonder why we could read the `/my-pod/profile/card` resource
 even though the above ACL resource prevents all access recursively.
 The reason for this is that WAC tries to find the ACL resource
 closest to the resource that is being accessed.
-When trying to access http://localhost:3000/profile/card,
-the server will first try to find the ACL resource http://localhost:3000/profile/card.acl.
+When trying to access http://localhost:3000/my-pod/profile/card,
+the server will first try to find the ACL resource http://localhost:3000/my-pod/profile/card.acl.
 Only if that one is not found will it try look for ACL resources in the parent containers:
-http://localhost:3000/profile/.acl and eventually http://localhost:3000/.acl.
-If you look again at the files, you will note that there is a `.data/profile/card.acl` file,
+http://localhost:3000/my-pod/profile/.acl and eventually http://localhost:3000/my-pod/.acl.
+If you look again at the files, you will note that there is a `.data/my-pod/profile/card.acl` file,
 which allows full read access to the resource,
 thereby making the profile fully readable for everyone.
 
@@ -358,11 +358,12 @@ This will start the demo application which you can see at http://localhost:3001/
 ### Accessing a protected resource
 In the authentication client, fill in the address of your running CSS instance (`http://localhost:3000/`)
 in the `Identity Provider` field and press `Log In`.
-This redirects you to your CSS instance that asks for your email and password combination.
+This redirects you to your CSS instance that asks for your email and password combination
+and asks you to authorize the client.
 After logging in there you are redirected back to the authentication client
 which shows that you will be identified with your WebID.
 
-You can now enter `http://localhost:3000/profile/` in the `Resource` field on the page and press fetch
+You can now enter `http://localhost:3000/my-pod/profile/` in the `Resource` field on the page and press fetch
 to access the resource that was previously restricted.
 
 ### Authentication summary
@@ -385,7 +386,7 @@ also fully implements the expected IdP behaviour,
 so it is both a Solid server and an IdP.
 
 Step 5 mentions that your WebID contains which IdP you trust.
-You can see this by looking at your profile document http://localhost:3000/profile/card#me.
+You can see this by looking at your profile document http://localhost:3000/my-pod/profile/card#me.
 It will contain the triple `:me solid:oidcIssuer <http://localhost:3000/>`.
 This is the triple that identifies our CSS instance as a trusted IdP.
 
@@ -477,7 +478,7 @@ cd CommunitySolidServer
 npm start -- -c ../unsafe.json -f ../.data
 ```
 This starts the server again on http://localhost:3000/.
-If you now browse to http://localhost:3000/profile/
+If you now browse to http://localhost:3000/my-pod/profile/
 you can see the contents of that container,
 while this was hidden when running our previous instance,
 showing that authentication no longer checks requests.
