@@ -2,7 +2,7 @@ This tutorial uses the [Community Solid Server (CSS)](https://github.com/Communi
 to both provide an introduction to Solid server behaviour,
 and an introduction to the CSS itself.
 
-This tutorial was last tested with v6.0.0 of the CSS and v1.15.0 of the `solid-authn-client`.
+This tutorial was last tested with v6.0.0 of the CSS and v1.17.1 of the `solid-authn-client`.
 
 ## Index
 - [Index](#index)
@@ -344,13 +344,17 @@ cd solid-client-authn-js
 npm ci
 ```
 
+> For Windows users, if you get the error `Error: Cannot find module '@nx/nx-win32-x64-msvc'`,
+> have a look at the comment [here](https://github.com/CommunitySolidServer/tutorials/issues/5#issuecomment-1700534492).
+
+
 This library contains both implementations for authenticating using Node.js and JavaScript in the browser.
 Besides that, it also has several example client implementations.
 We use one of these example implementations here.
 After installation is complete, use the following commands to install and start this client:
 ```shell
 cd packages/browser/examples/demoClientApp
-npm ci
+npm i
 npm start
 ```
 This will start the demo application which you can see at http://localhost:3001/.
