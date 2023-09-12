@@ -248,7 +248,7 @@ you could have chosen to create your WebID in a specific namespace during setup.
 Your WebID needs to be publicly accessible, so you can be identified,
 but your other resources can have restricted access.
 For example, when trying to access the profile container http://localhost:3000/my-pod/profile/
-you receive a `403: Not Logged In` error.
+you receive a `401: Unauthorized` error.
 
 We cover how to correctly authenticate in the next section,
 but we can already have a look now why this is the case.
