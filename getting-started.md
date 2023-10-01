@@ -418,7 +418,7 @@ that makes use of the authentication library in the background.
 At this point you can stop your CSS instance as we are going to have a look
 at how to customize a CSS configuration.
 Do not delete the `.data` folder yet though as we will reuse that data.
-We already saw in a previous section that it is possible configure the server
+We already saw in a previous section that it is possible to configure the server
 to have a memory backend or a file backend, but many more options are available.
 
 ### Components.js
