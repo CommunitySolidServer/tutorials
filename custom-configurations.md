@@ -46,23 +46,22 @@ that most closely matches what you want, and adapt that one.
 Below is a copy of one of those default configurations:
 ```json
 {
-  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^6.0.0/components/context.jsonld",
+  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^7.0.0/components/context.jsonld",
   "import": [
+    "css:config/app/init/static-root.json",
     "css:config/app/main/default.json",
-    "css:config/app/init/default.json",
-    "css:config/app/setup/required.json",
     "css:config/app/variables/default.json",
     "css:config/http/handler/default.json",
     "css:config/http/middleware/default.json",
-    "css:config/http/notifications/websockets.json",
+    "css:config/http/notifications/all.json",
     "css:config/http/server-factory/http.json",
     "css:config/http/static/default.json",
     "css:config/identity/access/public.json",
     "css:config/identity/email/default.json",
     "css:config/identity/handler/default.json",
+    "css:config/identity/oidc/default.json",
     "css:config/identity/ownership/token.json",
     "css:config/identity/pod/static.json",
-    "css:config/identity/registration/enabled.json",
     "css:config/ldp/authentication/dpop-bearer.json",
     "css:config/ldp/authorization/webacl.json",
     "css:config/ldp/handler/default.json",
@@ -71,6 +70,7 @@ Below is a copy of one of those default configurations:
     "css:config/ldp/modes/default.json",
     "css:config/storage/backend/file.json",
     "css:config/storage/key-value/resource-store.json",
+    "css:config/storage/location/pod.json",
     "css:config/storage/middleware/default.json",
     "css:config/util/auxiliary/acl.json",
     "css:config/util/identifiers/suffix.json",
@@ -149,14 +149,14 @@ we see the following (some parts cut for brevity):
 
 ```json
 {
-  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^6.0.0/components/context.jsonld",
+  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^7.0.0/components/context.jsonld",
   "@graph": [
     {
       "comment": "Allows multiple simultaneous read operations. Locks are stored on filesystem. Locks expire after inactivity. This locker is threadsafe.",
       "@id": "urn:solid-server:default:ResourceLocker",
       "@type": "WrappedExpiringReadWriteLocker",
       "locker": {
-        "@type": "EqualReadWriteLocker",
+        "@type": "PartialReadWriteLocker",
         ...
       },
       "expiration": 6000
@@ -181,7 +181,7 @@ Every `@type` field corresponds to a TypeScript class in the CSS project.
 [source code](https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v6.0.0/src/util/locking/WrappedExpiringReadWriteLocker.ts)
 in the CSS repository.
 A block with this field in it will tell Components.js that it should create an instance of this class if it finds it.
-The `@id` field is a unique identifier that we create so we can reference to this instance in different locations.
+The `@id` field is a unique identifier that we create, so we can reference this instance in different locations.
 Multiple blocks with the same `@id` value reference the same instantiation,
 so if there are multiple blocks with the same `@id`,
 Components.js will only create 1 instance and use its reference in all those locations.
@@ -209,7 +209,7 @@ has the following contents:
 
 ```json
 {
-  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^6.0.0/components/context.jsonld",
+  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^7.0.0/components/context.jsonld",
   "import": [
     "css:config/identity/pod/resource-generators/templated.json"
   ],
@@ -225,7 +225,7 @@ has the following contents:
 }
 ```
 
-This does not seem to have anything related to the templates used unfortunately.
+This does not seem to have anything related to the templates used, unfortunately.
 It does have an import though: `"css:config/identity/pod/resource-generators/templated.json"`.
 This means that
 [file]((https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v6.0.0/config/identity/pod/resource-generators/templated.json))
@@ -234,7 +234,7 @@ It contains the following data:
 
 ```json
 {
-  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^6.0.0/components/context.jsonld",
+  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^7.0.0/components/context.jsonld",
   "@graph": [
     {
       "comment": "Generates pods based on the templates in the corresponding folder.",
@@ -281,7 +281,7 @@ Going back to the lock expiration example of above, the following config could b
 
 ```json
 {
-  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^6.0.0/components/context.jsonld",
+  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^7.0.0/components/context.jsonld",
   "@graph": [
     {
       "@type": "Override",
@@ -351,7 +351,10 @@ We can thus append our own converter with the following configuration:
 
 ```json
 {
-  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^6.0.0/components/context.jsonld",
+  "@context": [
+    "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^7.0.0/components/context.jsonld",
+    "https://linkedsoftwaredependencies.org/bundles/npm/my-custom-package/^1.0.0/components/context.jsonld"
+  ],
   "@graph": [
     {
       "@id": "urn:solid-server:default:ChainedConverter",
@@ -373,13 +376,16 @@ This can then be combined with a default configuration as in the previous exampl
 with a command such as `npx @solid/community-server -c @css:config/file.json my-override-config.json`,
 and will set up the converters so yours is included.
 
+More information on how to create a custom component can be found [here](https://github.com/CommunitySolidServer/hello-world-component).
+
 ## Replacing components
 
 Sometimes an override or addition is not sufficient to make the changes you need.
-There might be cases where you want to completely replace one or more classes with another implementation.
-At the time of writing, Components.js overrides can not be used to change the class of a component,
-so the only option is to write your own configuration that contains the new components.
-The configuration clusters provided by the CSS project can still be used so you don't have to rewrite everything though.
+While you can use a Components.js override to change the class type associated with an identifier,
+you might, for some reason, need to make even more drastic changes.
+In this case, the only option remaining is to write your own configuration, that contains the new components.
+The configuration clusters provided by the CSS project can still be used, so you don't have to rewrite everything.
+
 The idea is that you reuse all the clusters,
 except for those that contain the definitions of the components that need to be replaced.
 Of the components that you do replace,
@@ -393,23 +399,22 @@ and provides a new implementation for the relevant identifiers found within.
 
 ```json
 {
-  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^6.0.0/components/context.jsonld",
+  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^7.0.0/components/context.jsonld",
   "import": [
+    "css:config/app/init/static-root.json",
     "css:config/app/main/default.json",
-    "css:config/app/init/default.json",
-    "css:config/app/setup/required.json",
     "css:config/app/variables/default.json",
     "css:config/http/handler/default.json",
     "css:config/http/middleware/default.json",
-    "css:config/http/notifications/websockets.json",
+    "css:config/http/notifications/all.json",
     "css:config/http/server-factory/http.json",
     "css:config/http/static/default.json",
     "css:config/identity/access/public.json",
     "css:config/identity/email/default.json",
     "css:config/identity/handler/default.json",
+    "css:config/identity/oidc/default.json",
     "css:config/identity/ownership/token.json",
     "css:config/identity/pod/static.json",
-    "css:config/identity/registration/enabled.json",
     "css:config/ldp/authentication/dpop-bearer.json",
     "css:config/ldp/authorization/webacl.json",
     "css:config/ldp/handler/default.json",
@@ -418,6 +423,7 @@ and provides a new implementation for the relevant identifiers found within.
     "css:config/ldp/modes/default.json",
     "css:config/storage/backend/file.json",
     "css:config/storage/key-value/resource-store.json",
+    "css:config/storage/location/pod.json",
     "css:config/storage/middleware/default.json",
     "css:config/util/auxiliary/acl.json",
     "css:config/util/identifiers/suffix.json",
