@@ -2,7 +2,7 @@ This tutorial uses the [Community Solid Server (CSS)](https://github.com/Communi
 to both provide an introduction to Solid server behaviour,
 and an introduction to the CSS itself.
 
-This tutorial was last tested with v6.0.0 of the CSS and v1.17.1 of the `solid-authn-client`.
+This tutorial was last tested with v7.0.0 of the CSS.
 
 ## Index
 - [Index](#index)
@@ -17,29 +17,30 @@ This tutorial was last tested with v6.0.0 of the CSS and v1.17.1 of the `solid-a
     + [DELETE a resource](#delete-a-resource)
   * [Using a different configuration](#using-a-different-configuration)
     + [File backend](#file-backend)
-- [Web Access Control (WAC)](#web-access-control-wac)
-  * [Setup](#setup)
-    + [WebID](#webid)
-    + [Access Control List](#access-control-list)
-    + [Access Control Policies](#access-control-policies)
+- [Creating a pod](#creating-a-pod)
+  * [WebID](#webid)
+- [Web Access Control (WAC)](#web-access-control--wac-)
+  * [Access Control List](#access-control-list)
+  * [Access Control Policies](#access-control-policies)
 - [Authentication and client applications](#authentication-and-client-applications)
   * [Authentication client](#authentication-client)
-  * [Accessing a protected resource](#accessing-a-protected-resource)
   * [Authentication summary](#authentication-summary)
-  * [Solid client applications](#solid-client-applications)
 - [Editing Community server configurations](#editing-community-server-configurations)
   * [Components.js](#componentsjs)
   * [Customizing imports](#customizing-imports)
     + [Disabling authorization](#disabling-authorization)
+  * [Configuration tool](#configuration-tool)
   * [Rewriting configurations](#rewriting-configurations)
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
 
 ## Requirements
 
 You will need the following to follow this tutorial:
 
-* [git](https://git-scm.com/)
 * [Node.js](https://nodejs.org/en/)
-  * Preferably 16.x but at the time of writing 14.x should also work.
+  * Version 18 or higher.
 * A text editor
 
 It makes things easier to keep all the work contained in a specific folder.
@@ -50,25 +51,29 @@ CSS is an open and modular implementation of the Solid [protocol](https://solidp
 It's easy to set up, and due to its modular nature many features can be configured,
 some of which we will cover later.
 
-More information on the server can be found in the [repository](https://github.com/CommunitySolidServer/CommunitySolidServer).
+More information on the server can be found in the [repository](https://github.com/CommunitySolidServer/CommunitySolidServer)
+and its corresponding [documentation](https://communitysolidserver.github.io/CommunitySolidServer/).
 
 ### Getting started
-While you can install the server as a global application,
-we work directly from the source in this tutorial.
-You do this by cloning the server from the git repository and installing it:
+There are several ways you can install the server.
+In this tutorial we will make use of `npx`, which is a command you get when installing Node.js.
 
+To start the server, run the following command:
 ```shell
-git clone https://github.com/CommunitySolidServer/CommunitySolidServer.git
-cd CommunitySolidServer
-npm ci
+npx @solid/community-server
 ```
+Make sure to confirm when the command asks you to install.
+This will then download and install the server in the `npx` cache.
+Once the log message appears indicating that the server has started,
+you can find your own Solid server at http://localhost:3000/.
 
-After that you start the server by running the following command from the same folder:
-```shell
-npm start
-```
-
-This starts your own Solid server, which you then see at http://localhost:3000/.
+> If you prefer, you can also install the server by cloning the git repository using the following commands.
+> Afterwards, all `npx @solid/community-server` commands in this tutorial should be replaced with `npm start --`.
+> ```shell
+> git clone https://github.com/CommunitySolidServer/CommunitySolidServer.git
+> cd CommunitySolidServer
+> npm ci
+> ```
 
 ### Example Solid HTTP requests
 All interactions with the server happen through HTTP requests,
@@ -197,19 +202,46 @@ so http://localhost:3000/a/ and http://localhost:3000/a/b/ still exist.
 The server we used so far has been running with a memory backend,
 which means all data is lost when the server is stopped.
 There are many ways to configure CSS and several default configurations are provided that can be used.
-When starting the server with `npm start` the server will default to a memory-based configuration.
+When starting the server without any parameters, the server will default to a memory-based configuration.
 
 #### File backend
 To have a more permanent storage solution, we will now start the server with a file backend.
 First stop the server that is still running, 
-then start it again with the following command from the source folder:
+then start it again with the following command:
 ```shell
-npm start -- -c config/file.json -f ../.data
+npx @solid/community-server -c config/file.json -f .data
 ```
 The above command starts the server with the `file.json` config,
 one of the available [default configurations](https://github.com/CommunitySolidServer/CommunitySolidServer/tree/main/config),
 which starts the server with a file backend.
-The `-f ../.data` parameter tells the server we want all data to be stored in that folder. 
+The `-f .data` parameter tells the server we want all data to be stored in the `.data` folder. 
+
+## Creating a pod
+A common concept in the Solid ecosystem is that of a "pod".
+There is no strict definition of what a pod is,
+but it generally corresponds to a space on a Solid server that a user controls and uses for their own data.
+
+To create a pod on our own server instance,
+we first have to create an account.
+Now that your server is running again,
+go to `http://localhost:3000/`,
+click the button to sign up for an account,
+and fill in the email/password combination you want to use.
+
+Afterwards you will be redirected to your account page.
+Once there, you can press the "Create pod" button to create your own pod.
+You can choose any name you want, but in this tutorial we will assume you chose **my-pod**.
+Make sure to keep the button checked to use the WebID in the pod.
+
+### WebID
+In the previous step the server created several resources for you,
+including a profile document with a WebID.
+A [WebID](https://dvcs.w3.org/hg/WebID/raw-file/tip/spec/identity-respec.html)
+is a way to identify yourself on the Web
+and is a core concept when authenticating with Solid.
+We make use of this a bit later in this tutorial.
+After creating your pod, you can find your profile resource at http://localhost:3000/my-pod/profile/card,
+with your WebID being http://localhost:3000/my-pod/profile/card#me.
 
 ## Web Access Control (WAC)
 In the previous HTTP examples no authentication was required to modify any of the resources,
@@ -218,36 +250,12 @@ CSS (and most other Solid servers) make use of
 [Web Access Control (WAC)](https://solid.github.io/web-access-control-spec/)
 to restrict access to resources.
 
-First we set up the server after which we cover the basics of this authentication scheme.
-
-### Setup
-With the newly configured server,
-if you browse to http://localhost:3000/ you will now see a setup screen.
-This setup allows you already set some initial permissions on the server.
-
-For this tutorial we take the **Sign up for an account** option.
-Choose the options to **Create a new WebID for my Pod**
-and to **Create a new Pod with my WebID as owner** with pod name **my-pod**.
-Make sure you don't forget the email/password combination that you choose.
-The response page will show some extra information about the setup result.
-
-#### WebID
-In the previous step the server created several resources for you,
-including a profile document with a WebID.
-A [WebID](https://dvcs.w3.org/hg/WebID/raw-file/tip/spec/identity-respec.html)
-is a way to identify yourself on the Web
-and is a core concept when authenticating with Solid.
-We make use of this a bit later in this tutorial.
-After setup, you can find your profile resource at http://localhost:3000/my-pod/profile/card,
-with your WebID being http://localhost:3000/my-pod/profile/card#me.
-
-In case that you want multiple users to have their WebID on your server,
-you could have chosen to create your WebID in a specific namespace during setup.
-
-#### Access Control List
-Your WebID needs to be publicly accessible, so you can be identified,
+### Access Control List
+Your WebID needs to be publicly accessible,
+so services can confirm your identity,
 but your other resources can have restricted access.
-For example, when trying to access the profile container http://localhost:3000/my-pod/profile/
+For example, you can see the root of your pod at http://localhost:3000/my-pod/,
+but when you try to browse to the profile container http://localhost:3000/my-pod/profile/,
 you receive a `401: Unauthorized` error.
 
 We cover how to correctly authenticate in the next section,
@@ -291,7 +299,8 @@ This file has the following contents:
         acl:Read, acl:Write, acl:Control.
 ```
 
-A full explanation of all triples can be found in the WAC specification.
+A full explanation of all triples can be found in the WAC specification,
+but we give a short summary here.
 The first block makes it so the root container (`acl:accessTo <./>`) 
 is readable (`acl:mode acl:Read`) 
 by all agents (`acl:agentClass foaf:Agent`).
@@ -317,12 +326,12 @@ If you look again at the files, you will note that there is a `.data/my-pod/prof
 which allows full read access to the resource,
 thereby making the profile fully readable for everyone.
 
-#### Access Control Policies
-While this is not covered in this tutorial,
-it should already be noted that research is being done
-into having a new authentication mechanism for Solid servers called
-[Access Control Policies (ACP)](https://solid.github.io/authorization-panel/acp-specification/).
-This is not supported yet in CSS but is planned as a future alternative.
+### Access Control Policies
+WAC is just one way to determine authorization on a Solid server.
+An alternative is [Access Control Policies (ACP)](https://solid.github.io/authorization-panel/acp-specification/),
+which has more flexibility in determining resource access.
+How ACP works is not covered in this tutorial,
+but CSS can be configured to use ACP instead of WAC for authorization.
 
 ## Authentication and client applications
 As could be seen in the previous section,
@@ -335,52 +344,34 @@ First we show an example of how authentication works,
 after which we provide an explanation of why exactly this works.
 
 ### Authentication client
-The de facto solution for authenticating with a Solid server is the 
+The de facto open source solution for authenticating with a Solid server is the 
 [solid-client-authn](https://github.com/inrupt/solid-client-authn-js) library.
-Start by cloning and installing that library in the tutorial folder:
-```shell
-git clone https://github.com/inrupt/solid-client-authn-js.git
-cd solid-client-authn-js
-npm ci
-```
+To authenticate you will need client that makes use of such a library to authenticate you.
+One example of such a client is [Penny](https://gitlab.com/vincenttunru/penny),
+of which you can find a running instance at https://penny.vincenttunru.com/.
 
-> For Windows users, if you get the error `Error: Cannot find module '@nx/nx-win32-x64-msvc'`,
-> have a look at the comment [here](https://github.com/CommunitySolidServer/tutorials/issues/5#issuecomment-1700534492).
-
-
-This library contains both implementations for authenticating using Node.js and JavaScript in the browser.
-Besides that, it also has several example client implementations.
-We use one of these example implementations here.
-After installation is complete, use the following commands to install and start this client:
-```shell
-cd packages/browser/examples/demoClientApp
-npm i
-npm start
-```
-This will start the demo application which you can see at http://localhost:3001/.
-
-### Accessing a protected resource
-In the authentication client, fill in the address of your running CSS instance (`http://localhost:3000/`)
-in the `Identity Provider` field and press `Log In`.
-This redirects you to your CSS instance that asks for your email and password combination
-and asks you to authorize the client.
-After logging in there you are redirected back to the authentication client
-which shows that you will be identified with your WebID.
-
-You can now enter `http://localhost:3000/my-pod/profile/` in the `Resource` field on the page and press fetch
-to access the resource that was previously restricted.
+You can insert the URL of your pod in the top bar of Penny to get an
+[overview](https://penny.vincenttunru.com/explore/?url=http%3A%2F%2Flocalhost%3A3000%2Fmy-pod%2F)
+of the resources located within.
+When clicking the `profile/` container though, we will again be informed we do not have access.
+To authenticate with Penny, press the "Connect Pod" button in the top right corner, 
+enter the URL of your server, `http://localhost:3000`, and connect.
+This will redirect you to your server,
+where you will be asked to authorize this client to log in with your WebID.
+After doing so, you will be redirected back to Penny.
+There you will see you now can access the profile container.
 
 ### Authentication summary
 The Solid-OIDC specification contains all the details,
 but below is a simplified summary of what happened during authentication above.
 
- 1. The Solid authn client asks what your Identity Provider (IdP) is.
- 2. The client redirects you to that IdP so you can identify yourself.
- 3. The IdP provides proof of what your WebID is.
+ 1. The client, Penny in this case, asks what your Identity Provider (IdP) is.
+ 2. The client redirects you to that IdP, so you can identify yourself.
+ 3. The IdP provides proof that identifies you as the owner of your WebID.
  4. The client adds this proof to its request when accessing a resource on the Solid server.
- 5. The Solid server GETs the WebID to find which IdP it trusts.
- 6. The Solid server asks the IdP if the provided proof is valid.
- 7. The Solid server verifies if the provided WebID can access the requested resource. 
+ 5. The Solid server GETs the WebID to find which IdP is responsible for proving its identity.
+ 6. The Solid server asks that IdP if the provided proof is valid.
+ 7. The Solid server verifies if the provided WebID can access the requested resource, based on the ACL resources. 
  8. The Solid server returns the resource.
 
 You might be wondering what this IdP is that has been mentioned several times.
@@ -389,7 +380,7 @@ Fortunately the CSS, besides implementing the Solid protocol,
 also fully implements the expected IdP behaviour,
 so it is both a Solid server and an IdP.
 
-Step 5 mentions that your WebID contains which IdP you trust.
+Step 5 mentions that your WebID contains which IdP is responsible.
 You can see this by looking at your profile document http://localhost:3000/my-pod/profile/card#me.
 It will contain the triple `:me solid:oidcIssuer <http://localhost:3000/>`.
 This is the triple that identifies our CSS instance as a trusted IdP.
@@ -399,20 +390,11 @@ it contained your WebID, and it was your trusted IdP.
 In practice these could all be different servers,
 which could all be different CSS instances or all instances of different Solid implementations.
 
-### Solid client applications
-An important part of the Solid ecosystem is the independence of clients and servers:
-it should have no impact on a client what Solid server implementation is used,
-as long as it follows the specification.
-
-We already saw an example of such an application in the previous section.
-The authentication client did not care that we were running a CSS instance,
-any kind of Solid server would work.
-
-An example of a more generic Solid client is [Penny](https://gitlab.com/vincenttunru/penny),
-of which you can find a running instance at https://penny.vincenttunru.com/.
-Penny allows you to connect to your Solid server which you can then also use to access private data.
-This is an example of a more complete application
-that makes use of the authentication library in the background.
+During this interaction,
+the client did not care that we were running a CSS instance,
+any kind of Solid server would have worked.
+This is because the algorithm is based on the Solid specification,
+and not on any specific implementation.
 
 ## Editing Community server configurations
 At this point you can stop your CSS instance as we are going to have a look
@@ -442,7 +424,7 @@ These folders and files have been structured in a such a way
 that every import line corresponds to a specific feature that can be changed.
 
 For example, if you look at the config that is used
-when running the server with `npm start` (`config/default.json`)
+when running the server with `npx @solid/community-server` (`config/default.json`)
 you can see it has the following import:
 ```
 "css:config/storage/backend/memory.json"
@@ -456,7 +438,7 @@ Every subfolder of `config` has a `README.md` document explaining what the avail
 For example, if you have a look at
 [config/storage/README.md](https://github.com/CommunitySolidServer/CommunitySolidServer/tree/main/config/storage)
 you can see that it is also possible to have a SPARQL backend by changing the import to use `sparql.json`.
-At the time of writing there are 29 import lines, so those are 29 features that can easily be customized.
+At the time of writing there are 31 import lines, so those are 31 features that can easily be customized.
 
 As for why these imports use the `css` prefix we refer to the Components.js documentation
 as this is based on the project settings.
@@ -478,8 +460,7 @@ we can see that another option for authorization is `allow-all`,
 so change that import line to be `css:config/ldp/authorization/allow-all.json` instead.
 Now start the server with the new server as follows:
 ```shell
-cd CommunitySolidServer
-npm start -- -c ../unsafe.json -f ../.data
+npx @solid/community-server -c unsafe.json -f .data
 ```
 This starts the server again on http://localhost:3000/.
 If you now browse to http://localhost:3000/my-pod/profile/
@@ -493,6 +474,8 @@ the server was stopped and restarted with a different configuration.
 There is also a configuration tool that provides a user interface for doing what we described above.
 It can be found at <https://communitysolidserver.github.io/configuration-generator/>
 and generates JSON-LD that you can use to start a CSS instance with the chosen options.
+The previous steps can be reproduced by going to the "Authorization" option in the link above,
+and selecting the "Disable" option.
 
 ### Rewriting configurations
 Sometimes more customization is needed than what changing the imports allow.
