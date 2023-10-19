@@ -209,7 +209,7 @@ To have a more permanent storage solution, we will now start the server with a f
 First stop the server that is still running, 
 then start it again with the following command:
 ```shell
-npx @solid/community-server -c config/file.json -f .data
+npx @solid/community-server -c @css:config/file.json -f .data
 ```
 The above command starts the server with the `file.json` config,
 one of the available [default configurations](https://github.com/CommunitySolidServer/CommunitySolidServer/tree/main/config),
@@ -407,7 +407,7 @@ to have a memory backend or a file backend, but many more options are available.
 When we wanted CSS to store data on disk,
 we told it to use the configuration
 [config/file.json](https://github.com/CommunitySolidServer/CommunitySolidServer/blob/main/config/file.json),
-which you can find in the CSS source folder.
+which you can find in the CSS repository.
 This is a [JSON-LD](https://json-ld.org/) file that mostly imports many other JSON-LD documents.
 If you explored all the imports you would find out that these documents
 link all classes together with their parameters.
@@ -449,9 +449,9 @@ This way we can read all our data without needing an authentication client.
 This is not something you want to do in production,
 but can be useful when running experiments during development.
 
-To start, copy the `config/file.json` file to your root tutorial folder,
+To start, copy the contents of the`config/file.json` config to your root tutorial folder,
 this is the same folder that should contain your `.data` folder,
-and rename it to `unsafe.json`.
+and name it `unsafe.json`.
 The import we want to change is the one that is responsible for authorization,
 which is the `css:config/ldp/authorization/webacl.json` import.
 Looking at the documentation for the 
