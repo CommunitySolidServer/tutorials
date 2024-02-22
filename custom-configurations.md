@@ -378,6 +378,130 @@ and will set up the converters so yours is included.
 
 More information on how to create a custom component can be found [here](https://github.com/CommunitySolidServer/hello-world-component).
 
+## Updating lists at specific positions
+
+In the previous sections you can see how to add an element to an existing list,
+but it is important to note that when you use that method,
+the position of where that element is inserted, is not defined.
+There are also situations where it is important to know what the position in a list will be.
+A good example of this is the list of handlers found in `css:config/http/handler/default.json`,
+also shown here:
+
+```json
+{
+  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^7.0.0/components/context.jsonld",
+  "import": [
+    "css:config/http/handler/handlers/storage-description.json"
+  ],
+  "@graph": [
+    {
+      "comment": "These are all the handlers a request will go through until it is handled.",
+      "@id": "urn:solid-server:default:HttpHandler",
+      "@type": "SequenceHandler",
+      "handlers": [
+        { "@id": "urn:solid-server:default:Middleware" },
+        {
+          "@id": "urn:solid-server:default:BaseHttpHandler",
+          "@type": "WaterfallHandler",
+          "handlers": [
+            { "@id": "urn:solid-server:default:StaticAssetHandler" },
+            { "@id": "urn:solid-server:default:OidcHandler" },
+            { "@id": "urn:solid-server:default:NotificationHttpHandler" },
+            { "@id": "urn:solid-server:default:StorageDescriptionHandler" },
+            { "@id": "urn:solid-server:default:AuthResourceHttpHandler" },
+            { "@id": "urn:solid-server:default:IdentityProviderHandler" },
+            { "@id": "urn:solid-server:default:LdpHandler" }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+When a new HTTP request comes in, these handlers are checked in order if they can handle that request,
+with the last one taking all requests that are not handled by any of those above it.
+In case you want to create a new handler for a certain kind of request,
+it is important that your handler is inserted in this list before the last element.
+Since the order is not defined when using the previously described method,
+that one will not do.
+
+One option is to use an override to completely replace the entire list.
+For example, you could have the following in your configuration:
+
+```json
+{
+  "@context": [
+    "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^7.0.0/components/context.jsonld",
+    "https://linkedsoftwaredependencies.org/bundles/npm/my-custom-package/^1.0.0/components/context.jsonld"
+  ],
+  "@graph": [
+    {
+      "@type": "Override",
+      "overrideInstance": { "@id": "urn:solid-server:default:BaseHttpHandler" },
+      "overrideParameters": {
+        "@type": "WaterfallHandler",
+        "handlers": [
+          { "@id": "urn:solid-server:default:StaticAssetHandler" },
+          { "@type": "MyCustomHandler" },
+          { "@id": "urn:solid-server:default:OidcHandler" },
+          { "@id": "urn:solid-server:default:NotificationHttpHandler" },
+          { "@id": "urn:solid-server:default:StorageDescriptionHandler" },
+          { "@id": "urn:solid-server:default:AuthResourceHttpHandler" },
+          { "@id": "urn:solid-server:default:IdentityProviderHandler" },
+          { "@id": "urn:solid-server:default:LdpHandler" }
+        ]
+      }
+    }
+  ]
+}
+```
+
+This way you fully control the entire structure of the list.
+The disadvantage is that you have to completely copy the list,
+which makes it harder to combine with other components that also want to insert into this list,
+and to keep up to date if the original list changes.
+
+For this reason,
+the [override](https://componentsjs.readthedocs.io/en/latest/configuration/configurations/overrides/) feature
+provides several options to modify the order of an existing list.
+The Components.js documentation contains all the available options,
+but below is already an example of how to insert our new component into the existing list at the same location
+as the example above
+
+```json
+{
+  "@context": [
+    "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^7.0.0/components/context.jsonld",
+    "https://linkedsoftwaredependencies.org/bundles/npm/my-custom-package/^1.0.0/components/context.jsonld"
+  ],
+  "@graph": [
+    {
+      "@type": "Override",
+      "overrideInstance": { "@id": "urn:solid-server:default:BaseHttpHandler" },
+      "overrideSteps": [
+        {
+          "@type": "OverrideListInsertAfter",
+          "overrideParameter": { "@id": "BaseHttpHandler:_handlers" },
+          "overrideTarget": { "@id": "urn:solid-server:default:StaticAssetHandler" },
+          "overrideValue": { "@type": "MyCustomHandler" }
+        }
+      ]
+    }
+  ]
+}
+```
+
+The above example tells Components.js to find the resource defined as `urn:solid-server:default:BaseHttpHandler`,
+and take its parameter `handlers`, which is expected to contain a list.
+In that list, it finds the element with identifier `urn:solid-server:default:StaticAssetHandler`,
+and inserts something new after that element, specifically our new custom handler.
+
+Note that due to the nature of how Components.js works,
+we can't use the standard shorthand notation to reference the `handlers` parameter.
+We have to use the URi instead, which is always `$CLASSNAME:_$PARAMETERNAME`,
+so in this case `BaseHttpHandler:_handlers`.
+
 ## Replacing components
 
 Sometimes an override or addition is not sufficient to make the changes you need.
