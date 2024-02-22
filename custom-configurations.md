@@ -19,6 +19,7 @@ The ["getting started" tutorial](getting-started.md) is a good place to get the 
     + [Alternative solutions to finding components](#alternative-solutions-to-finding-components)
   * [Overriding preset values](#overriding-preset-values)
   * [Adding components](#adding-components)
+  * [Updating lists at specific positions](#updating-lists-at-specific-positions)
   * [Replacing components](#replacing-components)
   * [Conclusion](#conclusion)
 
